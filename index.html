@@ -240,7 +240,7 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
     <div class="card"><span class="n">2</span><h3>Dizinleme</h3><span class="small muted">Hangi sayfada hangi kelimeler var, kütüphane kataloğu gibi kaydedilir.</span></div>
     <div class="card"><span class="n">3</span><h3>Sıralama</h3><span class="small muted">Biz aradığımızda en uygun bulunan sayfalar sıraya dizilip gösterilir.</span></div>
   </div>
-  <div class="warn"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg><div><b>En üstteki sonuç her zaman en doğrusu değildir.</b> Bazıları <b>reklamdır</b> ("Sponsorlu" yazar). En üstteki <b>yapay zekâ özeti</b> de yanılabilir.</div></div>
+  <div class="warn"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg><div><b>En üstteki sonuç her zaman en doğrusu değildir.</b> Bazıları <b>reklamdır</b> ("Sponsorlu" yazar). En üstteki yapay zekâ özeti (<b>AI Bakışı</b>) de yanılabilir.</div></div>
 </section>
 
 <!-- 8 AMACA GÖRE -->
@@ -265,10 +265,10 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
 </section>
 
 <!-- 10 BÖLÜM B -->
-<section class="slide divider" data-sec="b" data-notes="Kazanım b: Belirlediği arama motorlarını kullanır. Dört adım: anahtar kelime, operatörler, filtreler, doğru kaynak. Yaklaşık 20 dakika.">
+<section class="slide divider" data-sec="b" data-notes="Kazanım b: Belirlediği arama motorlarını kullanır. Adımlar: anahtar kelime, operatörler, filtreler, Google AI Modu, doğru kaynak. Yaklaşık 22 dakika.">
   <div class="kz"><i>b</i>Arama motorlarını kullanır</div>
   <div class="sq"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>nasıl arasam doğru sonucu bulurum?</div>
-  <p>Anahtar kelime → operatörler → filtreler → doğru kaynak</p>
+  <p>Anahtar kelime → operatörler → filtreler → AI Modu → doğru kaynak</p>
 </section>
 
 <!-- 11 ANAHTAR KELİME -->
@@ -356,6 +356,34 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
   </div>
 </section>
 
+<!-- 18b AI MODU -->
+<section class="slide" data-sec="b" data-notes="Google 2026 Şubat'tan beri Türkiye'de AI Modu ve AI Bakışı'nı kademeli olarak açıyor. AI Bakışı: normal aramada en üstte çıkan yapay zekâ özeti. AI Modu: sonuç sayfasındaki ayrı sekme; soruyu cümleyle sorarsın, cevabı yapay zekâ yazar, kaynak bağlantılarını da verir. Okul bilgisayarında görünmeyebilir; görünmezse kendi telefonundan göster.">
+  <div class="kick">Yeni: Google'da yapay zekâ</div>
+  <h2>Klasik arama ve AI Modu</h2>
+  <div class="diff fill">
+    <div><span class="t">Klasik arama</span><p>Kısa <b>anahtar kelime</b> ve operatörlerle ararız. Bize bir <b>bağlantı listesi</b> verir; okuyup seçen biziz.</p><span class="qline">deprem çantası site:afad.gov.tr</span></div>
+    <div class="ne">≠</div>
+    <div><span class="t">AI Modu</span><p>Sorumuzu <b>tam cümleyle</b> sorarız. Cevabı yapay zekâ <b>yazar</b>, yanına kaynak bağlantılarını koyar. Ardından <b>takip sorusu</b> sorabiliriz.</p><span class="qline" style="white-space:normal;border-radius:20px">Deprem çantasına neler koymalıyım?</span></div>
+  </div>
+  <div class="warn"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg><div><b>Cevabı yapay zekâ yazar, yanılabilir.</b> Normal aramada en üstte çıkan özetin adı <b>AI Bakışı</b>'dır; o da yanılabilir. İkisinde de kaynak bağlantılarına tıklayıp kontrol ederiz.</div></div>
+</section>
+
+<!-- 18c AI MODUNDA NASIL SORARIM -->
+<section class="slide" data-sec="b" data-notes="Ters durumu vurgula: klasik aramada uzun cümle kötüydü (Soru 3), AI Modunda ise açık ve tam soru daha iyi sonuç verir. Önce sınıfa sor, sonra kutuları aç.">
+  <div class="kick">AI Modunda nasıl sorarım?</div>
+  <h2>Burada kural tersine döner</h2>
+  <div class="grid2">
+    <div class="card"><span class="qline bad" style="font-size:30px">deprem</span><span class="qline good" style="font-size:26px;white-space:normal;border-radius:20px">Depreme hazırlık için evde neler yapmalıyız? 6. sınıf öğrencisine anlatır gibi açıkla.</span><button class="blank"><span class="ph">Hangisi daha iyi?</span><span class="a"><b>İkincisi.</b> AI Modunda ne istediğimizi tam cümleyle, kime göre anlatacağını da söyleyerek sorarız.</span></button></div>
+    <div class="card" style="gap:16px">
+      <h3>4 ipucu</h3>
+      <button class="blank block"><span class="ph">1</span><span class="a"><b>Tam soru sor:</b> ne istediğini açıkça yaz.</span></button>
+      <button class="blank block"><span class="ph">2</span><span class="a"><b>Seviyeni söyle:</b> "6. sınıf öğrencisine anlatır gibi".</span></button>
+      <button class="blank block"><span class="ph">3</span><span class="a"><b>Takip sorusu sor:</b> "Peki okulda ne yapmalıyız?"</span></button>
+      <button class="blank block"><span class="ph">4</span><span class="a"><b>Kaynağa tıkla:</b> cevabı 5 soruyla kontrol et.</span></button>
+    </div>
+  </div>
+</section>
+
 <!-- 19 5 SORU -->
 <section class="slide" data-sec="b" data-notes="MEB önerisi: Bu listeyi öğrencilerden gelen cevaplarla birlikte kurun. Önce 'Bir bilgiye güvenmeden önce ne sorarız?' diye sor, her cevapta bir kutuyu aç. Bu sınıfın ortak kontrol listesi.">
   <div class="kick">Doğru kaynağı bul</div>
@@ -421,7 +449,7 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
     <thead><tr><th>Araç</th><th>Ne kazandırır?</th><th>Neye dikkat?</th></tr></thead>
     <tbody>
       <tr><td><b>Arama operatörleri</b></td><td>Az ve isabetli sonuç</td><td><button class="blank"><span class="ph">Dokun</span><span class="a">Yanlış yazılırsa çalışmaz</span></button></td></tr>
-      <tr><td><b>Yapay zekâ özeti</b></td><td>Saniyeler içinde cevap</td><td><button class="blank"><span class="ph">Dokun</span><span class="a">Yanılabilir; kaynağına bakılır</span></button></td></tr>
+      <tr><td><b>AI Modu, AI Bakışı</b></td><td>Saniyeler içinde cevap</td><td><button class="blank"><span class="ph">Dokun</span><span class="a">Yanılabilir; kaynağına bakılır</span></button></td></tr>
       <tr><td><b>Web 2.0 araçları</b></td><td>Hızlı, birlikte içerik</td><td><button class="blank"><span class="ph">Dokun</span><span class="a">Kişisel bilgi paylaşma, izinsiz görsel kullanma</span></button></td></tr>
     </tbody>
   </table>
@@ -431,7 +459,7 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
 <section class="slide qslide" data-sec="c">
   <div class="ask">
     <div class="lbl">SORU 7</div>
-    <div class="qq">Yapay zekâ özeti sorunun cevabını 2 saniyede verdi. Doğrudan ödevine yazar mısın?</div>
+    <div class="qq">Google'ın AI Modu sorunun cevabını 2 saniyede verdi. Doğrudan ödevine yazar mısın?</div>
     <button class="blank block"><span class="ph">Cevap için dokun</span><span class="a"><b>Hayır.</b> Hızlıdır ama yanılabilir. Kaynağına bakıp 5 soruyla kontrol ederim. Hızlı <b>ve</b> doğruysa verimlidir.</span></button>
   </div>
 </section>
