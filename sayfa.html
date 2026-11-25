@@ -338,16 +338,16 @@ details ul{padding-left:1.2em;margin:.6em 0}
     <div class="diff">
       <div><span class="t">Anahtar kelime</span><p>Konuyu en iyi anlatan <b>önemli kelime</b>.</p><span class="qline">gezegen</span></div>
       <div class="ne" aria-hidden="true">≠</div>
-      <div><span class="t">Arama sorgusu</span><p>Arama kutusuna yazdığımız <b>ifadenin tamamı</b>.</p><span class="qline">güneş sistemi en büyük gezegen</span></div>
+      <div><span class="t">Arama sorgusu</span><p>Arama kutusuna yazdığımız <b>ifadenin tamamı</b>.</p><span class="qline">güneş sistemindeki en büyük gezegen</span></div>
     </div>
   </div>
 
   <div class="ask"><div class="lbl">SORU 3 · SINIFA SOR</div>
     <div class="qq">Hangisi daha iyi sonuç verir? Neden?</div>
-    <div class="qline bad">öğretmen bize ödev verdi gezegenlerin en büyüğü hangisi acaba</div>
-    <div class="qline good">güneş sistemi en büyük gezegen</div>
+    <div class="qline"><b>A)</b> öğretmen bize ödev verdi gezegenlerin en büyüğü hangisi acaba</div>
+    <div class="qline"><b>B)</b> güneş sistemindeki en büyük gezegen</div>
     <button class="reveal" data-reveal>Cevabı göster</button>
-    <div class="ans" hidden>İkincisi. Gereksiz kelimeler sonucu <b>bulandırır</b>, önemli kelimeler <b>netleştirir</b>. Kural: 2-4 önemli kelime seç, "bana, acaba, bir" gibi kelimeleri at. Sonuç çıkmazsa yakın anlamlı bir kelime dene.</div>
+    <div class="ans" hidden><b>B.</b> Gereksiz kelimeler sonucu <b>bulandırır</b>, önemli kelimeler <b>netleştirir</b>. Kural: 2-4 önemli kelime seç, "bana, acaba, bir" gibi kelimeleri at. Sonuç çıkmazsa yakın anlamlı bir kelime dene.</div>
   </div>
 
   <div class="block">
@@ -587,7 +587,7 @@ $$("[data-jump]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();i
 $("#teach").addEventListener("change",e=>document.body.classList.toggle("teacher",e.target.checked));
 
 /* üstteki yazan arama kutusu */
-const demo=["güneş sistemi en büyük gezegen","jaguar -araba","deprem çantası site:afad.gov.tr","geri dönüşüm filetype:pdf"];
+const demo=["güneş sistemindeki en büyük gezegen","jaguar -araba","deprem çantası site:afad.gov.tr","geri dönüşüm filetype:pdf"];
 const ty=$("#typed");
 if(reduce){ty.textContent=demo[2]}else{let i=0,j=0,del=false;(function tick(){const s=demo[i];
   if(!del){j++;ty.textContent=s.slice(0,j);if(j===s.length){del=true;return setTimeout(tick,1800)}}
