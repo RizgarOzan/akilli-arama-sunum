@@ -1,0 +1,717 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Akıllı Arama Atölyesi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: iki görünüm (1. ders kavramlar · 2. ders laboratuvar). Her bölüm bir arama kutusuyla açılır: başlık = sorgu. Renk rolleri: teal içerik, sarı not = sınıfa soru, turuncu = dikkat. Akıllı tahta için geniş ekranda yazı büyür. */
+:root{
+  --bg:#eef3f8; --surface:#ffffff; --ink:#132338; --muted:#52647a; --line:#d3dde9;
+  --accent:#0a6b73; --accent-soft:#dcefef; --warn:#8a4b00; --warn-soft:#ffe9d6;
+  --note:#fff3bf; --note-ink:#3b2f00; --mark:#ffd84d; --mark-ink:#3a2c00;
+  --ok:#1d7a3d; --ok-soft:#e1f3e6; --bad:#b3261e; --bad-soft:#fbe6e3; --amber:#875700; --amber-soft:#fff1d1;
+  --hero:#132338; --hero-ink:#f4f8fc; --hero-muted:#b0c1d4;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Lexend","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1520; --surface:#13202f; --ink:#e7eef6; --muted:#a3b5c9; --line:#26394e;
+  --accent:#56c4ca; --accent-soft:#143840; --warn:#ffb37a; --warn-soft:#3a2414;
+  --note:#2d2812; --note-ink:#ffeaa8; --mark:#ffd84d; --mark-ink:#2a2000;
+  --ok:#6fd393; --ok-soft:#123222; --bad:#ff8f86; --bad-soft:#3b1917; --amber:#ffc966; --amber-soft:#382c10;
+  --hero:#060d16; --hero-ink:#f4f8fc; --hero-muted:#a3b5c9; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1520; --surface:#13202f; --ink:#e7eef6; --muted:#a3b5c9; --line:#26394e;
+  --accent:#56c4ca; --accent-soft:#143840; --warn:#ffb37a; --warn-soft:#3a2414;
+  --note:#2d2812; --note-ink:#ffeaa8; --mark:#ffd84d; --mark-ink:#2a2000;
+  --ok:#6fd393; --ok-soft:#123222; --bad:#ff8f86; --bad-soft:#3b1917; --amber:#ffc966; --amber-soft:#382c10;
+  --hero:#060d16; --hero-ink:#f4f8fc; --hero-muted:#a3b5c9; color-scheme:dark}
+html{font-size:100%}
+@media (min-width:1100px){html{font-size:112.5%}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1.0625rem;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h3{font-size:1.35rem;font-weight:800}
+p{margin:0;max-width:62ch}
+.q{font-family:var(--f-mono);font-size:.92em}
+.hl{background:var(--mark);color:var(--mark-ink);padding:0 .25em;border-radius:5px}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px;border-radius:8px}
+button{font:inherit;cursor:pointer;color:inherit}
+.muted{color:var(--muted)}
+
+/* ---------- top bar ---------- */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:10px}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:999px}
+.tabs a{text-decoration:none;color:var(--muted);font-weight:600;font-size:.9rem;padding:7px 16px;border-radius:999px;white-space:nowrap}
+.tabs a[aria-current="page"]{background:var(--accent);color:var(--surface)}
+.tmode{display:flex;gap:6px;align-items:center;font-size:.82rem;color:var(--muted);cursor:pointer}
+.tmode input{accent-color:var(--accent)}
+.badges{display:flex;gap:6px;margin-left:auto}
+.badge{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);border:1.5px dashed var(--line);border-radius:999px;padding:3px 10px 3px 4px;white-space:nowrap}
+.badge i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--bg);font-style:normal;font-family:var(--f-mono);font-size:.75rem;font-weight:700}
+.badge.on{border-style:solid;border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.badge.on i{background:var(--accent);color:var(--surface)}
+.badge.pop{animation:pop .5s ease}
+@keyframes pop{40%{transform:scale(1.15)}}
+@media (max-width:760px){.badge span{display:none}.badge{padding-right:4px}.badges{margin-left:0}}
+
+/* ---------- hero ---------- */
+.hero{background:var(--hero);color:var(--hero-ink)}
+.hero .wrap{padding-block:40px 38px;display:grid;grid-template-columns:1.35fr 1fr;gap:28px;align-items:center}
+@media (max-width:780px){.hero .wrap{grid-template-columns:1fr}}
+.hero .kicker{font-size:.85rem;color:var(--hero-muted);font-weight:500}
+.hero h1{font-size:clamp(2.3rem,6vw,3.8rem);font-weight:800;margin-block:8px 12px}
+.hero h1 em{font-style:normal;color:var(--mark)}
+.hero p{color:var(--hero-muted);font-size:1.05rem}
+.sbox{display:flex;align-items:center;gap:10px;background:var(--surface);color:var(--ink);border-radius:999px;padding:12px 18px;margin-top:20px;max-width:540px;min-width:0}
+.sbox .typed{font-family:var(--f-mono);font-size:.98rem;white-space:nowrap;overflow:hidden;min-width:0}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--warn);animation:blink 1s steps(1) infinite;flex:none}
+@keyframes blink{50%{opacity:0}}
+.mission{border:1px solid rgba(255,255,255,.16);border-radius:var(--r);padding:20px 22px;display:grid;gap:14px}
+.mission b{font-family:var(--f-display);font-size:1.15rem}
+.mission ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.mission li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.mission li i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1.5px dashed var(--hero-muted);font-style:normal;font-family:var(--f-mono);font-size:.8rem;font-weight:700;color:var(--hero-muted)}
+.mission li span{display:block;color:var(--hero-muted);font-size:.86rem;line-height:1.4}
+
+/* ---------- section head = search box ---------- */
+.part{padding-block:48px 12px;display:grid;gap:26px}
+.shead{display:grid;gap:10px}
+.kz{font-size:.88rem;color:var(--muted);font-weight:500}
+.kz b{color:var(--accent);font-weight:700}
+.sq{display:flex;align-items:center;gap:14px;background:var(--surface);border:2px solid var(--line);border-radius:28px;padding:14px 24px;font-size:clamp(1.45rem,3.4vw,2.15rem);font-weight:800;box-shadow:0 10px 30px -22px rgba(19,35,56,.55)}
+.sq svg{flex:none;color:var(--accent)}
+.block{display:grid;gap:14px}
+.lead{font-size:1.12rem}
+
+/* ---------- question note (sınıfa sor) ---------- */
+.ask{background:var(--note);color:var(--note-ink);border-radius:var(--r);padding:20px 24px;display:grid;gap:12px}
+.ask .lbl{font-family:var(--f-mono);font-size:.8rem;font-weight:700;letter-spacing:.04em}
+.ask .qq{font-family:var(--f-display);font-size:clamp(1.25rem,2.6vw,1.6rem);font-weight:600;line-height:1.3}
+.ask .qline{background:var(--surface)}
+.reveal{justify-self:start;display:inline-flex;align-items:center;gap:8px;background:var(--note-ink);color:var(--note);border:0;border-radius:999px;padding:9px 18px;font-weight:600;font-size:.95rem}
+.ask .ans{background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 16px;font-size:1.05rem}
+
+/* ---------- difference card ---------- */
+.diff{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.diff>div{padding:20px 22px;display:grid;gap:8px;align-content:start;min-width:0}
+.diff .ne{display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--f-display);font-weight:800;font-size:1.8rem;padding:0 14px}
+.diff .t{font-family:var(--f-display);font-size:1.4rem;font-weight:800}
+.diff .ex{color:var(--muted);font-size:.95rem}
+.dlabel{font-size:.88rem;font-weight:600;color:var(--accent);margin-bottom:-4px}
+@media (max-width:620px){.diff{grid-template-columns:1fr}.diff .ne{padding:6px}}
+
+/* ---------- lists / rows ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.steps div{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:4px;align-content:start}
+.steps .n{font-family:var(--f-display);font-weight:800;font-size:2rem;color:var(--accent);line-height:1}
+.steps b{font-size:1.1rem}
+@media (max-width:640px){.steps{grid-template-columns:1fr}}
+.pick{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pick div{background:var(--surface);border-radius:var(--r);padding:16px 18px;display:grid;gap:2px}
+.pick .for{font-size:.9rem;color:var(--accent);font-weight:600}
+.pick b{font-family:var(--f-display);font-size:1.2rem}
+@media (max-width:560px){.pick{grid-template-columns:1fr}}
+
+.warnline{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:16px 20px;font-size:1.02rem}
+.warnline svg{margin-top:2px}
+.pair{display:flex;flex-wrap:wrap;gap:8px;margin-block:8px 4px}
+
+.qline{font-family:var(--f-mono);background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:7px 16px;overflow-x:auto;white-space:nowrap;font-size:.95rem;max-width:100%}
+.qline.bad{border-color:var(--bad);color:var(--bad)} .qline.good{border-color:var(--ok);color:var(--ok)}
+
+/* operators */
+.ops{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+@media (max-width:820px){.ops{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.ops{grid-template-columns:1fr}}
+.opcard{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:6px;align-content:start;min-width:0}
+.opcard .big{font-family:var(--f-mono);font-weight:700;font-size:1.5rem;color:var(--accent);line-height:1.2}
+.opcard b{font-size:1.05rem}
+.opcard p{font-size:.95rem;color:var(--muted)}
+.opcard .qline{font-size:.85rem;margin-top:4px;white-space:normal;overflow-wrap:anywhere;border-radius:12px}
+
+/* five questions */
+.five{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.five div{background:var(--surface);border-radius:14px;padding:16px 14px;display:grid;gap:4px;align-content:start}
+.five b{font-family:var(--f-display);font-size:1.25rem;font-weight:800;color:var(--accent)}
+.five span{font-size:.92rem;line-height:1.4}
+@media (max-width:820px){.five{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.five{grid-template-columns:1fr}}
+
+.tbl{overflow-x:auto;border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:1rem}
+th,td{padding:12px 18px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.85rem;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+.op{font-family:var(--f-mono);font-weight:700;background:var(--mark);color:var(--mark-ink);padding:1px 7px;border-radius:6px;white-space:nowrap}
+
+.kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kinds div{background:var(--surface);border-radius:var(--r);padding:16px 18px;display:grid;gap:4px;align-content:start}
+.kinds b{font-family:var(--f-display);font-size:1.15rem}
+.kinds .ex{font-size:.92rem;color:var(--muted);line-height:1.45}
+@media (max-width:820px){.kinds{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.kinds{grid-template-columns:1fr}}
+
+.srcs{display:flex;flex-wrap:wrap;gap:8px}
+.srcs span{background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.95rem}
+.srcs span b{color:var(--accent)}
+
+.homework{background:var(--surface);border:2px dashed var(--accent);border-radius:var(--r);padding:18px 22px;display:grid;gap:6px}
+
+/* teacher notes */
+.tnote{display:none;background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:10px 16px;font-size:.92rem}
+body.teacher .tnote{display:block}
+
+/* buttons */
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 16px;font-size:1rem;text-align:left;text-decoration:none;color:var(--ink);display:inline-block;line-height:1.35}
+.btn:hover{border-color:var(--accent)}
+.btn.main{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.btn.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.btn.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.btn[disabled]{cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.next{padding-block:12px 48px}
+
+/* ---------- lab ---------- */
+.labhead{background:var(--hero);color:var(--hero-ink)}
+.labhead .wrap{padding-block:34px 30px;display:grid;gap:16px}
+.labhead h1{font-size:clamp(2rem,5vw,3rem);font-weight:800}
+.labhead p{color:var(--hero-muted)}
+.lsteps{display:flex;flex-wrap:wrap;gap:10px}
+.lsteps a{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--hero-ink);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px 6px 6px;font-size:.92rem}
+.lsteps a i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);font-style:normal;font-family:var(--f-mono);font-size:.8rem;font-weight:700}
+.lab{display:grid;gap:22px;padding-block:32px 24px}
+.task{background:var(--surface);border-radius:var(--r);padding:24px;display:grid;gap:18px;scroll-margin-top:80px}
+.task-h{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.task-h h2{font-size:clamp(1.4rem,3vw,1.9rem);font-weight:800}
+.task-h h2 small{display:block;font-family:var(--f-body);font-size:.85rem;font-weight:600;color:var(--accent);margin-bottom:2px}
+.prog{font-family:var(--f-mono);font-weight:700;font-size:.95rem;color:var(--accent);background:var(--accent-soft);padding:5px 14px;border-radius:999px;font-variant-numeric:tabular-nums}
+.mc{display:grid;gap:10px;padding-top:16px;border-top:1px solid var(--line)}
+.mc.first{border-top:0;padding-top:0}
+.mc .qq{font-weight:600;font-size:1.05rem}
+.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.fb{font-size:.95rem;border-radius:10px;padding:9px 13px}
+.fb.ok{background:var(--ok-soft);color:var(--ok)} .fb.no{background:var(--bad-soft);color:var(--bad)}
+.qtask{display:grid;gap:10px;padding-top:16px;border-top:1px solid var(--line)}
+.qtask.first{border-top:0;padding-top:0}
+.qtask .qq{font-weight:600;font-size:1.05rem}
+.qin{display:flex;gap:8px;align-items:center;background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:6px 6px 6px 18px;min-width:0}
+.qin.good{border-color:var(--ok)} .qin.bad{border-color:var(--bad)}
+.qin svg{flex:none;color:var(--muted)}
+.qin input{flex:1;min-width:0;border:0;background:transparent;font-family:var(--f-mono);font-size:1.05rem;color:var(--ink);padding:6px 0}
+.qin input:focus{outline:none}
+.qin:focus-within{outline:3px solid var(--warn);outline-offset:2px}
+.qin .btn{border-radius:999px;padding:8px 16px;flex:none}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.95rem}
+.checks li{color:var(--muted)}
+.checks li::before{content:"○  "}
+.checks li.ok{color:var(--ok)} .checks li.ok::before{content:"●  "}
+.checks li.no{color:var(--bad)} .checks li.no::before{content:"✕  "}
+.post{background:var(--bg);border-radius:14px;padding:16px 18px;display:grid;gap:10px}
+.post .meta{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.post .head{font-family:var(--f-display);font-weight:600;font-size:1.2rem;line-height:1.3}
+.verdict{font-size:.95rem;border-radius:10px;padding:10px 14px}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.warn{background:var(--amber-soft);color:var(--amber)} .verdict.no{background:var(--bad-soft);color:var(--bad)}
+.sub{font-family:var(--f-display);font-weight:600;font-size:1.1rem;padding-top:8px}
+.ck{display:grid;gap:8px}
+.ck label{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border-radius:12px;padding:10px 14px;cursor:pointer}
+.ck input{margin-top:6px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.cert{background:var(--hero);color:var(--hero-ink);border-radius:var(--r);padding:28px;display:grid;gap:14px;text-align:center;justify-items:center}
+.cert h2{color:var(--mark);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800}
+.cert .score{font-family:var(--f-display);font-weight:800;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.cert .bl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.cert .badge{background:transparent;border-color:rgba(255,255,255,.25);color:var(--hero-muted)}
+.cert .badge span{display:inline}
+.cert .badge.on{background:var(--accent);border-color:var(--accent);color:var(--hero);}
+.cert .badge.on i{background:var(--hero-ink);color:var(--hero)}
+.cert .btn{background:transparent;color:var(--hero-ink);border-color:rgba(255,255,255,.3)}
+
+details{background:var(--surface);border-radius:var(--r);padding:14px 20px}
+summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:1.1rem}
+details ul{padding-left:1.2em;margin:.6em 0}
+.foot{color:var(--muted);font-size:.85rem;padding-block:16px 48px}
+@media (prefers-reduced-motion:reduce){.caret,.badge.pop{animation:none}}
+</style>
+
+<header class="bar gut"><div class="wrap">
+  <nav class="tabs" aria-label="Dersler"><a href="#ders1" id="t1">1. Ders · Kavramlar</a><a href="#lab" id="t2">2. Ders · Laboratuvar</a></nav>
+  <label class="tmode" for="teach"><input type="checkbox" id="teach"> Öğretmen notları</label>
+  <div class="badges" aria-label="Rozetler">
+    <div class="badge" data-b="a" title="Motor Seçici"><i>a</i><span>Motor Seçici</span></div>
+    <div class="badge" data-b="b" title="Sorgu Ustası"><i>b</i><span>Sorgu Ustası</span></div>
+    <div class="badge" data-b="c" title="Bilgi Dedektifi"><i>c</i><span>Bilgi Dedektifi</span></div>
+  </div>
+</div></header>
+
+<!-- ======================= 1. DERS ======================= -->
+<div data-view="ders1">
+<section class="hero gut"><div class="wrap">
+  <div style="min-width:0">
+    <div class="kicker">6. sınıf Bilişim Teknolojileri ve Yazılım · Bilgisayar Ağları ve İletişim</div>
+    <h1>İnternette <em>ara</em>,<br>bul, <em>sorgula</em>.</h1>
+    <p>Bugün birer dijital dedektifiz. Aradığımızı hızlı bulmayı ve bulduğumuza ne zaman güvenebileceğimizi öğreniyoruz.</p>
+    <div class="sbox" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--accent);flex:none"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span class="typed" id="typed"></span><span class="caret"></span>
+    </div>
+  </div>
+  <div class="mission">
+    <b>Ders sonunda 3 rozet</b>
+    <ol>
+      <li><i>a</i><div>Motor Seçici<span>Amacıma uygun arama motorunu seçerim.</span></div></li>
+      <li><i>b</i><div>Sorgu Ustası<span>Doğru kelime ve komutlarla arar, doğru kaynağı bulurum.</span></div></li>
+      <li><i>c</i><div>Bilgi Dedektifi<span>Yeni araçların işime yarayıp yaramadığını ve bilginin doğru olup olmadığını sorgularım.</span></div></li>
+    </ol>
+  </div>
+</div></section>
+
+<main class="gut"><div class="wrap">
+<div class="tnote" style="margin-top:24px"><b>Kazanım BTY.6.3.1 · İnternet ile amacına uygun olarak çalışabilme.</b> Bölümler kazanımın a, b, c maddelerine karşılık gelir. Süre: a ~8 dk, b ~20 dk, c ~12 dk. Sarı kartlar sınıfa sorulacak sorular; önce sor, cevapları al, sonra "Cevabı göster".</div>
+
+<!-- ---------- a ---------- -->
+<section class="part" id="a">
+  <div class="shead">
+    <div class="kz"><b>a</b> · Arama motorlarını belirler</div>
+    <h2 class="sq"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>arama motoru nedir, hangisini seçeriz?</h2>
+  </div>
+  <div class="tnote">Açılış: "Ödev için en son neyi, nerede aradınız?" Cevaplarda Chrome ile Google'ın karıştığını göreceksin; Soru 1 tam bunun için.</div>
+
+  <div class="ask"><div class="lbl">SORU 1 · SINIFA SOR</div>
+    <div class="qq">Google Chrome bir arama motoru mudur?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden>Hayır. Chrome bir <b>web tarayıcısıdır</b>. Google ise bir <b>arama motorudur</b>. Chrome'u açarız, içinde Google'da arama yaparız.</div>
+  </div>
+
+  <div class="block">
+    <div class="dlabel">Farkı ne?</div>
+    <div class="diff">
+      <div><span class="t">Web tarayıcısı</span><p>İnternet sayfalarını açıp ekranda gösteren <b>program</b>.</p><span class="ex">Chrome, Firefox, Edge, Safari</span><span class="ex">Bizi gideceğimiz yere götüren <b>araba</b> gibi.</span></div>
+      <div class="ne" aria-hidden="true">≠</div>
+      <div><span class="t">Arama motoru</span><p>İnternetteki sayfaları, görselleri, videoları bulup liste hâlinde sunan <b>internet hizmeti</b>.</p><span class="ex">Google, Bing, Yandex, DuckDuckGo</span><span class="ex">Nereye gideceğimizi gösteren <b>harita</b> gibi.</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Arama motoru nasıl çalışır?</h3>
+    <p>Arama kutusuna yazdığımız anda bütün interneti gezmez. Önceden hazırladığı dev bir kataloğa bakar.</p>
+    <div class="steps">
+      <div><span class="n">1</span><b>Tarama</b><span class="muted">"Örümcek" denen robot programlar bağlantıdan bağlantıya atlayıp sayfaları gezer.</span></div>
+      <div><span class="n">2</span><b>Dizinleme</b><span class="muted">Hangi sayfada hangi kelimeler var, kütüphane kataloğu gibi kaydedilir.</span></div>
+      <div><span class="n">3</span><b>Sıralama</b><span class="muted">Biz aradığımızda en uygun bulunan sayfalar sıraya dizilip gösterilir.</span></div>
+    </div>
+    <div class="warnline"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg><div><b>En üstteki sonuç her zaman en doğrusu değildir.</b> Bazıları <b>reklamdır</b>, yanında "Sponsorlu" yazar. En üstte çıkan <b>yapay zekâ özeti</b> de yanılabilir.</div></div>
+  </div>
+
+  <div class="block">
+    <h3>Amacına göre seç</h3>
+    <div class="pick">
+      <div><span class="for">Günlük bilgi, harita, haber, görsel</span><b>Google · Bing · Yandex</b></div>
+      <div><span class="for">Bilim insanlarının yazdığı araştırmalar</span><b>Google Akademik</b></div>
+      <div><span class="for">Arama geçmişim takip edilmesin</span><b>DuckDuckGo</b></div>
+      <div><span class="for">Bir sitenin içinde arama (video, ansiklopedi)</span><b>Sitenin kendi arama kutusu</b></div>
+    </div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 2 · SINIFA SOR</div>
+    <div class="qq">Arıların nasıl bal yaptığını bilim insanlarının yazdığı bir yazıdan öğrenmek istiyorsun. Hangi arama motorunu kullanırsın? Neden?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><b>Google Akademik.</b> Bilim insanlarının araştırmaları orada toplanır. Öğrenci hem motoru hem nedenini söyleyebiliyorsa bu madde tamam.</div>
+  </div>
+</section>
+
+<!-- ---------- b ---------- -->
+<section class="part" id="b">
+  <div class="shead">
+    <div class="kz"><b>b</b> · Arama motorlarını kullanır</div>
+    <h2 class="sq"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>nasıl arasam doğru sonucu bulurum?</h2>
+  </div>
+  <div class="tnote">Dört adım: anahtar kelime → operatörler → filtreler → doğru kaynağı bulmak. MEB programı site:, intitle: ve filetype: operatörlerini adıyla sayıyor; kaynak kontrolü (kim, ne zaman, amaç, karşılaştırma) ve sınıfça ortak kontrol listesi de bu maddenin içinde.</div>
+
+  <div class="block">
+    <div class="dlabel">Farkı ne?</div>
+    <div class="diff">
+      <div><span class="t">Anahtar kelime</span><p>Konuyu en iyi anlatan <b>önemli kelime</b>.</p><span class="qline">gezegen</span></div>
+      <div class="ne" aria-hidden="true">≠</div>
+      <div><span class="t">Arama sorgusu</span><p>Arama kutusuna yazdığımız <b>ifadenin tamamı</b>.</p><span class="qline">güneş sistemi en büyük gezegen</span></div>
+    </div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 3 · SINIFA SOR</div>
+    <div class="qq">Hangisi daha iyi sonuç verir? Neden?</div>
+    <div class="qline bad">öğretmen bize ödev verdi gezegenlerin en büyüğü hangisi acaba</div>
+    <div class="qline good">güneş sistemi en büyük gezegen</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden>İkincisi. Gereksiz kelimeler sonucu <b>bulandırır</b>, önemli kelimeler <b>netleştirir</b>. Kural: 2-4 önemli kelime seç, "bana, acaba, bir" gibi kelimeleri at. Sonuç çıkmazsa yakın anlamlı bir kelime dene.</div>
+  </div>
+
+  <div class="block">
+    <h3>Arama operatörleri</h3>
+    <p><b>Arama operatörü</b>, arama motoruna "şöyle ara" diyen özel işaret ya da komuttur. Görevi sonuçları <span class="hl">daraltmaktır</span>.</p>
+    <div class="ops">
+      <div class="opcard"><div class="big">" "</div><b>Tam ifade</b><p>Kelimeleri aynı sırayla, bütün olarak arar. Bir sözü ya da dizeyi aramak için.</p><span class="qline">"bilinçli internet kullanımı"</span></div>
+      <div class="opcard"><div class="big">-</div><b>Kelime çıkar</b><p>İstemediğin kelimeyi sonuçlardan çıkarır. Jaguar hem hayvan hem araba markasıdır.</p><span class="qline">jaguar -araba</span></div>
+      <div class="opcard"><div class="big">site:</div><b>Tek sitede ara</b><p>Yalnızca belirli bir sitenin içinde arar.</p><span class="qline">uzay site:tubitak.gov.tr</span></div>
+      <div class="opcard"><div class="big">filetype:</div><b>Dosya türü</b><p>Belirli dosya türünü getirir: pdf belge, pptx sunum.</p><span class="qline">geri dönüşüm filetype:pdf</span></div>
+      <div class="opcard"><div class="big">intitle:</div><b>Başlıkta geçsin</b><p>Kelime sayfanın başlığında geçmeli. Yalnızca yanındaki ilk kelimeye uygulanır.</p><span class="qline">intitle:deprem hazırlık</span></div>
+      <div class="opcard"><div class="big">OR</div><b>Biri yeter</b><p>İki kelimeden biri geçsin yeter. Mutlaka büyük harfle yazılır.</p><span class="qline">kedi OR köpek bakımı</span></div>
+    </div>
+    <div class="warnline"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><div><b>En sık hata: iki noktadan sonra boşluk bırakmak.</b> Komut ile kelime bitişik yazılır.<div class="pair"><span class="qline good">site:meb.gov.tr  ✓</span><span class="qline bad">site: meb.gov.tr  ✕</span></div>Operatörler en iyi Google'da çalışır; diğer motorlarda bazıları farklı davranabilir.</div></div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 4 · SINIFA SOR</div>
+    <div class="qq">Yalnızca AFAD'ın sitesinde "deprem çantası" aramak için arama kutusuna ne yazarız?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><span class="q">deprem çantası site:afad.gov.tr</span> · İki noktadan sonra boşluk yok.</div>
+  </div>
+
+  <div class="block">
+    <div class="dlabel">Farkı ne?</div>
+    <div class="diff">
+      <div><span class="t">Operatör</span><p>Aramadan <b>önce</b>, arama kutusuna <b>yazılır</b>.</p><span class="qline">geri dönüşüm filetype:pdf</span></div>
+      <div class="ne" aria-hidden="true">≠</div>
+      <div><span class="t">Filtre</span><p>Aramadan <b>sonra</b>, sonuç sayfasında <b>tıklanır</b>: Görseller, Videolar, Haberler sekmeleri ve Araçlar → Zaman.</p><span class="ex">İkisinin işi aynı: sonuçları daraltmak.</span></div>
+    </div>
+    <p class="muted">Komutları ezberlemek zorunda değilsin: Google'ın <b>Gelişmiş Arama</b> sayfası (google.com/advanced_search) aynı işi doldurulacak kutucuklarla yapar.</p>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 5 · SINIFA SOR</div>
+    <div class="qq">Öğretmenin son bir yılda yayımlanmış geri dönüşüm haberlerini istiyor. Ne yaparsın?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><b>geri dönüşüm</b> yazarım → <b>Haberler</b> sekmesine geçerim → <b>Araçlar</b>'dan zamanı <b>Son 1 yıl</b> yaparım.</div>
+  </div>
+
+  <div class="block">
+    <h3>Doğru kaynağı bul: 5 soru</h3>
+    <p><b>Güvenilir bilgi</b>; kaynağı belli olan, kanıta dayanan ve başka güvenilir kaynaklarla doğrulanabilen bilgidir. Bir sonuca tıkladığında şu 5 soruyu sor:</p>
+    <div class="five">
+      <div><b>Kim?</b><span>Yazarı ya da kurumu belli mi?</span></div>
+      <div><b>Ne zaman?</b><span>Tarihi var mı, güncel mi?</span></div>
+      <div><b>Neden?</b><span>Bilgilendirmek mi, satmak mı, korkutmak mı?</span></div>
+      <div><b>Kanıt?</b><span>Veri, belge, resmî açıklama var mı?</span></div>
+      <div><b>Başka nerede?</b><span>Başka güvenilir kaynakta da geçiyor mu?</span></div>
+    </div>
+    <p class="muted">Çok beğenilmesi ya da çok paylaşılması, bir bilginin doğru olduğunu göstermez.</p>
+    <div class="tnote">MEB önerisi: Bu 5 soruyu öğrencilerden gelen cevaplarla tahtada birlikte oluşturun; bu sınıfın ortak kontrol listesi olsun.</div>
+  </div>
+
+  <div class="block">
+    <h3>Adres çubuğu ipucu verir</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Uzantı</th><th>Kimin?</th><th>Örnek</th></tr></thead>
+      <tbody>
+        <tr><td><span class="op">.gov.tr</span></td><td>Devlet kurumları</td><td class="q">afad.gov.tr · mgm.gov.tr</td></tr>
+        <tr><td><span class="op">.edu.tr</span></td><td>Üniversiteler</td><td class="q">hacettepe.edu.tr</td></tr>
+        <tr><td><span class="op">meb.k12.tr</span></td><td>MEB'e bağlı okullar</td><td class="q">okuladi.meb.k12.tr</td></tr>
+        <tr><td><span class="op">.com</span></td><td>Herkes alabilir</td><td>Şirketler, bloglar, kişisel siteler</td></tr>
+      </tbody>
+    </table></div>
+    <div class="srcs"><span>Deprem → <b>AFAD</b></span><span>Hava durumu → <b>Meteoroloji</b></span><span>Bilim, uzay → <b>TÜBİTAK</b></span><span>Sağlık → <b>Sağlık Bakanlığı</b></span><span>Ders → <b>EBA</b></span></div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 6 · SINIFA SOR</div>
+    <div class="qq">Arkadaşın diyor ki: "Sonu .gov.tr olan bir sitedeki her bilgi kesinlikle günceldir." Haklı mı?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><b>Tam olarak değil.</b> Resmî siteler güvenilir kaynaktır ama eski bir sayfa güncelliğini yitirmiş olabilir; tarihine yine bakılır. Uzantı tek başına yetmez, 5 soru her zaman sorulur.</div>
+  </div>
+</section>
+
+<!-- ---------- c ---------- -->
+<section class="part" id="c">
+  <div class="shead">
+    <div class="kz"><b>c</b> · Yeni internet teknolojilerini verimlilik açısından değerlendirir</div>
+    <h2 class="sq"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>bu araç işime yarıyor mu, söylediği doğru mu?</h2>
+  </div>
+  <div class="tnote">MEB bu maddede Web 2.0 araçlarını, zaman kazandıran araçları ve yanlış haberleri ayırt etmeyi istiyor. "Verimli" kelimesini açıkça tanımla: az zamanda, doğru sonuca ulaşmak.</div>
+
+  <p class="lead">Bir araç <span class="hl">verimliyse</span> bizi <b>daha kısa sürede</b>, <b>doğru</b> sonuca ulaştırır. Hızlı ama yanlışsa verimli değildir.</p>
+
+  <div class="block">
+    <div class="dlabel">Yeni internet teknolojisi: Web 2.0 araçları</div>
+    <div class="diff">
+      <div><span class="t">Nedir?</span><p>Yalnızca okuduğumuz değil, kendi içeriğimizi <b>oluşturup paylaştığımız</b> internet uygulamaları. Kurulum gerektirmez, tarayıcıda çalışır.</p><span class="ex">Canva gibi tasarım araçları, kelime bulutu araçları, dijital panolar</span></div>
+      <div class="ne" aria-hidden="true">→</div>
+      <div><span class="t">Neden verimli?</span><p>Hazır şablonlarla <b>zaman kazandırır</b>. Birkaç kişi aynı anda çalışabilir. Otomatik kaydeder, kolayca paylaşılır.</p></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Araçları tartalım</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Araç</th><th>Ne kazandırır?</th><th>Neye dikkat?</th></tr></thead>
+      <tbody>
+        <tr><td><b>Arama operatörleri</b></td><td>Yüzlerce sonuç yerine az ve tam isabetli sonuç</td><td>Yanlış yazılırsa çalışmaz</td></tr>
+        <tr><td><b>Yapay zekâ özeti, sohbet asistanı</b></td><td>Saniyeler içinde kısa cevap</td><td>Yanılabilir; kaynağına bakmadan kullanılmaz</td></tr>
+        <tr><td><b>Web 2.0 araçları</b></td><td>Şablonla hızlı ve birlikte içerik hazırlama</td><td>Kişisel bilgi paylaşma, başkasının görselini izinsiz kullanma</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 7 · SINIFA SOR</div>
+    <div class="qq">Yapay zekâ özeti sorunun cevabını 2 saniyede verdi. Bu cevabı doğrudan ödevine yazar mısın?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><b>Hayır.</b> Hızlıdır ama yanılabilir. Altındaki kaynaklara bakıp 5 soruyla kontrol ederim. Hız + doğruluk birlikteyse verimlidir.</div>
+  </div>
+
+  <div class="block">
+    <h3>Bilgi kirliliği</h3>
+    <p>İnternette herkes içerik paylaşabilir. Doğru bilginin yanlış, eksik ya da uydurma bilgilerle karışmasına <b>bilgi kirliliği</b> denir. Kirli suyu içmeden önce nasıl süzersek, bilgiyi de paylaşmadan önce süzeriz.</p>
+    <div class="kinds">
+      <div><b>Yanlış bilgi</b><span class="ex">Gerçeğe uymaz. Bazen bilmeden, iyi niyetle paylaşılır.</span></div>
+      <div><b>Yanıltıcı bilgi</b><span class="ex">Bağlamından koparılmıştır. Yıllar önceki başka bir yerin fotoğrafı "dün burada oldu" diye paylaşılır.</span></div>
+      <div><b>Sahte haber</b><span class="ex">Gerçek habere benzesin diye hazırlanmış uydurma içerik.</span></div>
+      <div><b>Tıklama tuzağı</b><span class="ex">"Şok! İnanamayacaksınız!" gibi abartılı başlıkla tıklatmaya çalışır.</span></div>
+      <div><b>Sahte görsel, ses, video</b><span class="ex">Yapay zekâyla hiç yaşanmamış bir olay gerçekmiş gibi gösterilebilir (deepfake).</span></div>
+      <div><b>Bilgi kılığında reklam</b><span class="ex">"Mucize ürün" yazıları çoğu zaman bir şey satmak içindir.</span></div>
+    </div>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 8 · SINIFA SOR</div>
+    <div class="qq">Bir arkadaşın şu mesajı attı: "Yarın bütün internet 24 saat kapanacak, herkese yay!" Ne yaparsın?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden>Paylaşmadan önce 5 soruyu sorarım: Kim söylüyor? Kanıt var mı? Resmî bir kaynakta geçiyor mu? Geçmiyorsa paylaşmam; "herkese yay" baskısı da şüphe işaretidir.</div>
+  </div>
+
+  <div class="homework">
+    <b style="font-family:var(--f-display);font-size:1.15rem">Ödev · Doğru bilgi afişi</b>
+    <p>Bir Web 2.0 aracıyla "Doğru bilgiye ulaşmanın 5 sorusu" afişi ya da kelime bulutu hazırla, EBA'da paylaş. Arkadaşlarının ürünlerini tarafsız şekilde değerlendir.</p>
+  </div>
+
+  <div class="ask"><div class="lbl">SORU 9 · DERS SONU</div>
+    <div class="qq">Bugünkü 3 rozet neydi, her biri ne anlama geliyor?</div>
+    <button class="reveal" data-reveal>Cevabı göster</button>
+    <div class="ans" hidden><b>Motor Seçici:</b> amaca göre arama motoru seçmek. <b>Sorgu Ustası:</b> doğru kelime, operatör, filtre ve 5 soruyla doğru kaynağı bulmak. <b>Bilgi Dedektifi:</b> yeni araçların verimli olup olmadığını ve bilginin doğruluğunu sorgulamak. Rozetleri laboratuvarda kazanacağız.</div>
+  </div>
+</section>
+<div class="next row"><a class="btn main" href="#lab">Laboratuvar görevlerine geç →</a></div>
+</div></main>
+</div>
+
+<!-- ======================= LAB ======================= -->
+<div data-view="lab" hidden>
+<section class="labhead gut"><div class="wrap">
+  <h1>Dedektif görevleri</h1>
+  <p>Üç kısa görev, üç rozet. Önce sayfada çöz, sonra istersen gerçek aramada dene.</p>
+  <nav class="lsteps" aria-label="Görevler"><a href="#lab" data-jump="g1"><i>a</i>Motor Seçici</a><a href="#lab" data-jump="g2"><i>b</i>Sorgu Ustası</a><a href="#lab" data-jump="g3"><i>c</i>Bilgi Dedektifi</a><a href="#lab" data-jump="g4"><i>✓</i>Çıkış bileti</a></nav>
+</div></section>
+<main class="gut"><div class="wrap lab">
+  <div class="tnote"><b>40 dk:</b> Görev 1 ~7 dk · Görev 2 ~15 dk · Görev 3 ~10 dk · Çıkış bileti ~8 dk. Amaç yeni konu öğretmek değil, 1. derste anlatılanların oturup oturmadığını yoklamak. Bir öğrenci bitirince karnedeki "Yeni öğrenci için sıfırla" ile sayfa sıfırlanır.</div>
+
+  <div class="task" id="g1">
+    <div class="task-h"><h2><small>Görev 1 · rozet a</small>Motor Seçici</h2><span class="prog" id="p1">0 / 4</span></div>
+    <p>Her durum için en uygun arama aracını seç. 3 doğru rozeti kazandırır.</p>
+    <div id="g1q"></div>
+  </div>
+
+  <div class="task" id="g2">
+    <div class="task-h"><h2><small>Görev 2 · rozet b</small>Sorgu Ustası</h2><span class="prog" id="p2">0 / 5</span></div>
+    <p>Sorguyu kutuya yaz, <b>Kontrol et</b>'e bas. Doğruysa Google'da da dene. 4 doğru rozeti kazandırır.</p>
+    <div id="g2q"></div>
+    <div class="tnote">Kontrol düğmesi iki noktadan sonra boşluk hatasını ayrıca yakalar. Bu hatayı yapan öğrenciye kuralı kendi cümlesiyle söylet.</div>
+  </div>
+
+  <div class="task" id="g3">
+    <div class="task-h"><h2><small>Görev 3 · rozet c</small>Bilgi Dedektifi</h2><span class="prog" id="p3">0 / 6</span></div>
+    <div class="sub">Verimli mi?</div>
+    <div id="g3a"></div>
+    <div class="sub">Haber dedektifi</div>
+    <p class="muted">Bu paylaşımlar derse özel hazırlanmış örneklerdir, gerçek değildir. Her biri için kararını ver.</p>
+    <div id="g3q" style="display:grid;gap:12px"></div>
+    <div class="sub">Bonus · Görev 2'de bulduğun bir sayfayı 5 soruyla incele</div>
+    <div class="ck" id="ck">
+      <label for="c1"><input type="checkbox" id="c1"><span><b>Kim?</b> Yazarı ya da kurumu belli.</span></label>
+      <label for="c2"><input type="checkbox" id="c2"><span><b>Ne zaman?</b> Tarihi var ve güncel.</span></label>
+      <label for="c3"><input type="checkbox" id="c3"><span><b>Neden?</b> Amacı bilgilendirmek; satış ya da korkutma değil.</span></label>
+      <label for="c4"><input type="checkbox" id="c4"><span><b>Kanıt?</b> Veri, belge ya da kaynak gösteriyor.</span></label>
+      <label for="c5"><input type="checkbox" id="c5"><span><b>Başka nerede?</b> Aynı bilgiyi başka güvenilir bir sitede de buldum.</span></label>
+    </div>
+    <div class="fb" id="ckOut" style="background:var(--accent-soft)"></div>
+  </div>
+
+  <div class="task" id="g4">
+    <div class="task-h"><h2><small>Son adım</small>Çıkış bileti</h2><span class="prog" id="p4">0 / 8</span></div>
+    <div id="g4q"></div>
+  </div>
+
+  <div class="cert" id="cert">
+    <div style="color:var(--hero-muted);font-size:.9rem">Dedektif karnesi</div>
+    <h2>Akıllı Arama Dedektifi</h2>
+    <div class="bl">
+      <div class="badge" data-b="a"><i>a</i><span>Motor Seçici</span></div>
+      <div class="badge" data-b="b"><i>b</i><span>Sorgu Ustası</span></div>
+      <div class="badge" data-b="c"><i>c</i><span>Bilgi Dedektifi</span></div>
+    </div>
+    <div><div class="score" id="sc">0 / 8</div><div style="color:var(--hero-muted);font-size:.9rem">çıkış bileti</div></div>
+    <p id="rank" style="color:var(--hero-muted)"></p>
+    <button class="btn" id="resetAll">Yeni öğrenci için sıfırla</button>
+  </div>
+</div></main>
+</div>
+
+<div class="gut"><div class="wrap" style="display:grid;gap:12px">
+  <details>
+    <summary>Öğretmen için: kazanım ve kaynaklar</summary>
+    <p style="margin-top:10px"><b>BTY.6.3.1. İnternet ile amacına uygun olarak çalışabilme</b><br>a) İleri düzey arama yapmak için kullanabileceği arama motorlarını belirler.<br>b) Belirlediği arama motorlarını kullanır.<br>c) Öğrendiği yeni internet teknolojilerini verimlilik kapsamında değerlendirir.</p>
+    <ul>
+      <li><a href="https://tymm.meb.gov.tr/bilisim-teknolojileri-ve-yazilim-dersi/unite/684" target="_blank" rel="noopener">MEB TYMM · 6. sınıf 3. Tema</a></li>
+      <li><a href="https://bilgebt.com/2026/11/20/etkilesimli-okuma-internette-gelismis-arama/" target="_blank" rel="noopener">BilgeBT · Etkileşimli Okuma: İnternette Gelişmiş Arama</a></li>
+      <li><a href="https://bilgebt.com/2026/11/20/basilabilir-test-6-sinif-tema-3/" target="_blank" rel="noopener">BilgeBT · Basılabilir Test: 6. Sınıf Tema 3</a></li>
+      <li><a href="https://www.bilisimnotlari.net/2026/11/6-siniflar-10-hafta-internette-ileri-duzey-arama/" target="_blank" rel="noopener">Bilişim Notları · 10. Hafta: İnternette İleri Düzey Arama</a></li>
+      <li><a href="https://www.bulanca.com/tag/6-sinif-bilisim-testi-coz" target="_blank" rel="noopener">Bulanca · 6. sınıf materyalleri (eski programa göre)</a></li>
+    </ul>
+  </details>
+  <p class="foot">Laboratuvardaki haber örnekleri kurgusaldır. Operatörlerin çalışma biçimi arama motoruna göre değişebilir.</p>
+</div></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* görünüm */
+function route(){const v=location.hash==="#lab"?"lab":"ders1";
+  $$("[data-view]").forEach(x=>x.hidden=x.dataset.view!==v);
+  $("#t1").setAttribute("aria-current",v==="ders1"?"page":"false");
+  $("#t2").setAttribute("aria-current",v==="lab"?"page":"false");
+  window.scrollTo(0,0);}
+addEventListener("hashchange",route);route();
+$$("[data-jump]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(location.hash!=="#lab")location.hash="lab";
+  setTimeout(()=>document.getElementById(a.dataset.jump).scrollIntoView({behavior:reduce?"auto":"smooth"}),30)}));
+
+$("#teach").addEventListener("change",e=>document.body.classList.toggle("teacher",e.target.checked));
+
+/* üstteki yazan arama kutusu */
+const demo=["güneş sistemi en büyük gezegen","jaguar -araba","deprem çantası site:afad.gov.tr","geri dönüşüm filetype:pdf"];
+const ty=$("#typed");
+if(reduce){ty.textContent=demo[2]}else{let i=0,j=0,del=false;(function tick(){const s=demo[i];
+  if(!del){j++;ty.textContent=s.slice(0,j);if(j===s.length){del=true;return setTimeout(tick,1800)}}
+  else{j--;ty.textContent=s.slice(0,j);if(j===0){del=false;i=(i+1)%demo.length}}
+  setTimeout(tick,del?28:70)})()}
+
+$$("[data-reveal]").forEach(b=>b.onclick=()=>{const a=b.parentElement.querySelector(".ans");a.hidden=!a.hidden;b.textContent=a.hidden?"Cevabı göster":"Cevabı gizle"});
+
+/* rozetler */
+const earned={a:false,b:false,c:false};
+function setBadge(k,on){if(earned[k]===on)return;earned[k]=on;
+  $$(`.badge[data-b="${k}"]`).forEach(x=>{x.classList.toggle("on",on);if(on&&!reduce){x.classList.remove("pop");void x.offsetWidth;x.classList.add("pop")}});rank();}
+function rank(){const n=Object.values(earned).filter(Boolean).length;
+  $("#rank").textContent=["Görevleri tamamladıkça rozetlerin burada parlar.","Çırak dedektif: 1 rozet. Devam!","Usta dedektif: 2 rozet. Bir tane kaldı!","Baş dedektif: 3 rozetin hepsi senin!"][n];}
+
+/* çoktan seçmeli */
+function mc(box,items,onAnswer){
+  box.innerHTML="";
+  items.forEach((it,qi)=>{const w=el("div","mc"+(qi===0?" first":""));w.appendChild(el("div","qq",`${qi+1}. ${it.q}`));
+    const o=el("div","opts"),fb=el("div","fb");fb.hidden=true;
+    it.o.forEach((t,oi)=>{const b=el("button","btn",t);b.onclick=()=>{if(o.dataset.d)return;o.dataset.d=1;const r=oi===it.a;
+      b.classList.add(r?"right":"wrong");o.children[it.a].classList.add("right");[...o.children].forEach(x=>x.disabled=true);
+      fb.hidden=false;fb.className="fb "+(r?"ok":"no");fb.textContent=(r?"Doğru! ":"Doğru cevap yeşil olan. ")+(it.w||"");onAnswer(r)};o.appendChild(b)});
+    w.append(o,fb);box.appendChild(w)});
+}
+
+/* Görev 1 */
+const g1=[
+  {q:"Arıların nasıl bal yaptığını bilim insanlarının yazdığı bir yazıdan öğrenmek istiyorsun.",o:["Google Akademik","DuckDuckGo","Video sitesinin arama kutusu"],a:0,w:"Bilim insanlarının araştırmaları Google Akademik'te toplanır."},
+  {q:"Okula en yakın halk kütüphanesinin haritadaki yerini arıyorsun.",o:["Google Akademik","Genel arama motoru (Google, Bing, Yandex)","Ansiklopedinin arama kutusu"],a:1,w:"Harita ve günlük bilgi için genel arama motoru."},
+  {q:"Arama geçmişinin kişiye özel takip edilmesini istemiyorsun.",o:["DuckDuckGo","Google Akademik","Hiçbiri olmaz"],a:0,w:"DuckDuckGo gizliliğe önem vermesiyle bilinir."},
+  {q:"Sevdiğin bir hayvan belgeselinin videosunu izlemek istiyorsun.",o:["Google Akademik","Video sitesinin kendi arama kutusu","Hava durumu sitesi"],a:1,w:"Sitenin kendi arama kutusu o sitenin içinde arar."}
+];
+function initG1(){let ok=0,n=0;$("#p1").textContent="0 / 4";mc($("#g1q"),g1,r=>{n++;if(r)ok++;$("#p1").textContent=`${ok} / 4`;if(n===4)setBadge("a",ok>=3)})}
+
+/* Görev 2 */
+const norm=s=>s.replace(/[“”„″]/g,'"').toLocaleLowerCase("tr").replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c").replace(/\s+/g," ");
+const g2=[
+  {q:"Yalnızca AFAD'ın sitesinde <b>deprem çantası</b> ara.",ex:"deprem çantası site:afad.gov.tr",checks:[
+    [s=>/deprem/.test(s)&&/canta/.test(s),"Konu kelimeleri: deprem çantası"],
+    [s=>/site:afad\.gov\.tr/.test(s),"site:afad.gov.tr"]]},
+  {q:"<b>Geri dönüşüm</b> hakkında PDF belge bul.",checks:[
+    [s=>/geri donusum/.test(s),"Konu kelimeleri: geri dönüşüm"],
+    [s=>/(filetype|ext):pdf/.test(s),"filetype:pdf"]]},
+  {q:"<b>Jaguar</b> hayvanını ara; araba sonuçları çıkmasın.",checks:[
+    [s=>/jaguar/.test(s),"Konu kelimesi: jaguar"],
+    [s=>/(^| )-araba/.test(s),"-araba (eksi ile kelime bitişik)"]]},
+  {q:"Başlığında <b>deprem</b> kelimesi geçen, <b>deprem hazırlığı</b> ile ilgili sayfaları bul.",checks:[
+    [s=>/intitle:deprem/.test(s),"intitle:deprem"],
+    [s=>/hazirlik/.test(s),"Konu kelimesi: hazırlık"]]},
+  {q:"Atatürk'ün <b>Hayatta en hakiki mürşit ilimdir</b> sözünü kelimesi kelimesine ara.",checks:[
+    [s=>/"[^"]*hakiki mursit[^"]*"/.test(s),"Söz tırnak içinde"]]}
+];
+let solved=new Set();
+function initG2(){const box=$("#g2q");box.innerHTML="";solved=new Set();$("#p2").textContent="0 / 5";
+  g2.forEach((t,i)=>{const w=el("div","qtask"+(i===0?" first":""));w.appendChild(el("div","qq",`${i+1}. ${t.q}`));
+    const bar=el("div","qin");bar.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    const inp=el("input");inp.type="text";inp.id="g2i"+i;inp.setAttribute("aria-label","Görev 2, sorgu "+(i+1));inp.placeholder="sorgunu yaz";inp.autocomplete="off";inp.spellcheck=false;inp.setAttribute("autocapitalize","off");
+    const go=el("button","btn main","Kontrol et");bar.append(inp,go);
+    const ul=el("ul","checks");t.checks.forEach(c=>ul.appendChild(el("li","",c[1])));
+    const msg=el("div","fb");msg.hidden=true;
+    const link=el("a","btn","Google'da dene ↗");link.target="_blank";link.rel="noopener";link.hidden=true;
+    const run=()=>{const raw=inp.value.trim(),s=norm(raw);
+      if(!raw){msg.hidden=false;msg.className="fb no";msg.textContent="Önce sorgunu yaz.";return}
+      let all=true;[...ul.children].forEach((li,ci)=>{const ok=t.checks[ci][0](s);li.className=ok?"ok":"no";if(!ok)all=false});
+      let hint="";
+      if(/\b(site|filetype|intitle|ext|after):\s/.test(s))hint="İki noktadan sonra boşluk bıraktın. Komutla kelime bitişik yazılır.";
+      else if(/(^| )- /.test(s))hint="Eksi işaretiyle kelime bitişik yazılır: -araba";
+      if(hint)all=false;
+      msg.hidden=false;bar.className="qin "+(all?"good":"bad");
+      msg.className="fb "+(all?"ok":"no");
+      msg.textContent=all?"Harika sorgu! Şimdi Google'da deneyip sonuca bak.":(hint||"Kırmızı maddeye bak ve sorgunu düzelt.");
+      link.hidden=!all;link.href="https://www.google.com/search?q="+encodeURIComponent(raw);
+      if(all)solved.add(i);else solved.delete(i);
+      $("#p2").textContent=`${solved.size} / 5`;setBadge("b",solved.size>=4)};
+    go.onclick=run;inp.addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+    const r=el("div","row");r.appendChild(link);
+    w.append(bar,ul,msg,r);box.appendChild(w)});
+}
+
+/* Görev 3 */
+const g3a=[
+  {q:"Sınıfça ortak bir afişi 4 kişi aynı anda hazırlayacaksınız. Hangisi en verimli?",o:["Herkes kâğıda ayrı çizer, sonra birleştiririz","Çevrim içi bir Web 2.0 tasarım aracında birlikte çalışırız","Biri tek başına hazırlar, diğerleri bekler"],a:1,w:"Web 2.0 araçları aynı anda birlikte çalışmayı ve şablonla hız kazanmayı sağlar."},
+  {q:"Yapay zekâ özeti bir sorunun cevabını hemen verdi. Ne yaparsın?",o:["Doğrudan ödevime yazarım","Altındaki kaynaklara bakıp doğrularım","Hiç okumadan kapatırım"],a:1,w:"Hızlı olması yetmez; doğruysa verimlidir. Kaynağa bakarak doğrularız."}
+];
+const posts=[
+  {meta:"paylasim-sok24.xyz · yazar yok · tarih yok",head:"ŞOK! Okullar 3 ay tatil oluyor! Bu mesajı 10 kişiye gönder!!!",ans:"no",why:"Yazar ve tarih yok, site tanınmıyor, başlık abartılı ve paylaşmaya zorluyor. Böyle bir karar olsaydı MEB'in resmî sitesinde yer alırdı."},
+  {meta:"bir üniversitenin .edu.tr sitesi · Biyoloji Bölümü · 2026",head:"Bal arılarının polen taşıması üzerine yapılan araştırmanın sonuçları",ans:"ok",why:"Kurum belli, tarih güncel, araştırmaya dayanıyor. Önemli bir bilgiyi yine de bir kaynakta daha kontrol etmek iyi alışkanlıktır."},
+  {meta:"sosyal medya · 'GezginKedi99' · dün",head:"Bu fotoğraf dün şehrimizdeki selden! (fotoğrafta palmiyeler ve okyanus var)",ans:"warn",why:"Kişisel hesap, kanıt yok, fotoğraf başka bir yerden ya da eski olabilir. Yanıltıcı bilgi örneği olabilir."},
+  {meta:"mucize-urun.shop · Sponsorlu",head:"Bu çayı içen öğrenciler 1 haftada bütün sınavlardan 100 aldı!",ans:"no",why:"Amaç satış, iddia gerçek dışı, kanıt yok. \"Sponsorlu\" yazısı bunun bir reklam olduğunu gösterir."}
+];
+const lab={ok:"Güvenilir",warn:"Şüpheli",no:"Güvenilmez"};
+function initG3(){let ok=0,n=0;$("#p3").textContent="0 / 6";
+  const tally=r=>{n++;if(r)ok++;$("#p3").textContent=`${ok} / 6`;if(n===6)setBadge("c",ok>=5)};
+  mc($("#g3a"),g3a,tally);
+  const box=$("#g3q");box.innerHTML="";
+  posts.forEach(p=>{const c=el("div","post");c.appendChild(el("div","meta",p.meta));c.appendChild(el("div","head",p.head));
+    const r=el("div","row"),v=el("div","verdict");v.hidden=true;
+    [["ok","Güvenilir"],["warn","Şüpheli, kontrol et"],["no","Güvenilmez"]].forEach(([k,l])=>{const b=el("button","btn",l);b.onclick=()=>{
+      if(r.dataset.d)return;r.dataset.d=1;const g=k===p.ans;b.classList.add(g?"right":"wrong");[...r.children].forEach(x=>x.disabled=true);
+      v.hidden=false;v.className="verdict "+p.ans;v.innerHTML=`<b>${g?"Tebrikler dedektif!":"Bir daha bak."} Doğru karar: ${lab[p.ans]}.</b> ${p.why}`;tally(g)};r.appendChild(b)});
+    c.append(r,v);box.appendChild(c)});
+}
+const ckMsg=["Henüz hiçbir soruyu kontrol etmedin.","Başlangıç iyi, devam et.","Yarı yoldasın.","Neredeyse tamam.","Bir soru kaldı.","Bu sayfa 5 sorudan da geçti. Güvenle kullanabilirsin."];
+function ck(){const n=$$("#ck input").filter(i=>i.checked).length;$("#ckOut").innerHTML=`<b>${n} / 5</b> · ${ckMsg[n]}`}
+$$("#ck input").forEach(i=>i.addEventListener("change",ck));
+
+/* çıkış bileti */
+const ex=[
+  {q:"Hangisi bir web tarayıcısıdır?",o:["Bing","Mozilla Firefox","Yandex","DuckDuckGo"],a:1},
+  {q:"Bilim insanlarının yazdığı araştırmaları bulmak için en uygun arama aracı hangisidir?",o:["Google Akademik","Video sitesi","Hava durumu sitesi","Harita uygulaması"],a:0},
+  {q:'<span class="q">deprem çantası site:afad.gov.tr</span> ne yapar?',o:["Deprem videolarını getirir","Yalnızca AFAD sitesinde arar","Deprem kelimesini çıkarır","AFAD'ı kapatır"],a:1},
+  {q:"Hangisi doğru yazılmıştır?",o:['<span class="q">filetype: pdf</span>','<span class="q">filetype:pdf</span>','<span class="q">filetype :pdf</span>','<span class="q">file type:pdf</span>'],a:1},
+  {q:"Operatör ile filtrenin farkı nedir?",o:["Operatör aramadan önce yazılır, filtre sonra tıklanır","İkisi aynı şeydir","Filtre arama kutusuna yazılır","Operatör yalnızca görsellerde çalışır"],a:0},
+  {q:"Kullanıcının içerik oluşturup paylaşabildiği internet uygulamalarına ne denir?",o:["Arama operatörü","Web 2.0 aracı","Web tarayıcısı","Alan adı"],a:1},
+  {q:"Haber görünümünde hazırlanmış uydurma içeriğe ne denir?",o:["Tıklama tuzağı","Sahte haber","Anahtar kelime","Arama filtresi"],a:1},
+  {q:"Bir bilgiyi kontrol ederken hangisi YAPILMAZ?",o:["Yazarına bakmak","Tarihine bakmak","Çok beğenildiği için doğru saymak","Başka kaynakla karşılaştırmak"],a:2}
+];
+function initEx(){let ok=0;$("#p4").textContent="0 / 8";$("#sc").textContent="0 / 8";mc($("#g4q"),ex,r=>{if(r)ok++;$("#p4").textContent=`${ok} / 8`;$("#sc").textContent=`${ok} / 8`})}
+
+function resetAll(){["a","b","c"].forEach(k=>setBadge(k,false));initG1();initG2();initG3();initEx();$$("#ck input").forEach(i=>i.checked=false);ck();rank();
+  document.getElementById("g1").scrollIntoView({behavior:reduce?"auto":"smooth"})}
+initG1();initG2();initG3();initEx();ck();rank();
+$("#resetAll").onclick=resetAll;
+})();
+</script>
+</body></html>
