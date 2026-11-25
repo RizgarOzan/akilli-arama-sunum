@@ -37,8 +37,24 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* ---------- slide base ---------- */
 .slide{position:absolute;inset:0;padding:64px 96px 60px;display:none;flex-direction:column;gap:30px;font-size:32px;line-height:1.4}
-.slide.on{display:flex;animation:in .28s ease}
-@keyframes in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.slide.on{display:flex;animation:inF .5s cubic-bezier(.2,.8,.2,1)}
+.slide.on.back{animation-name:inB}
+@keyframes inF{from{opacity:0;transform:translateX(70px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes inB{from{opacity:0;transform:translateX(-70px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.slide.on>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.slide.on>*:nth-child(2){animation-delay:.07s}.slide.on>*:nth-child(3){animation-delay:.14s}.slide.on>*:nth-child(4){animation-delay:.21s}.slide.on>*:nth-child(5){animation-delay:.28s}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*:nth-child(2){animation-delay:.08s}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*:nth-child(3){animation-delay:.16s}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*:nth-child(4){animation-delay:.24s}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*:nth-child(5){animation-delay:.32s}
+.slide.on :is(.grid2,.grid3,.chips,.rows,.five,.mission,.steps,.ex4)>*:nth-child(6){animation-delay:.4s}
+.verb{font-family:var(--f-display);font-weight:800;font-size:36px;color:var(--accent);letter-spacing:.02em}
+.ico{width:68px;height:68px;border-radius:18px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.hook{background:var(--hero);color:var(--hero-ink);border-radius:22px;padding:20px 32px;font-size:34px;text-align:center}
+.hook b{color:var(--mark)}
+.row .s .tip{display:block;font-size:22px;color:var(--muted);margin-top:2px}
 .slide p{margin:0}
 .kick{font-size:24px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:12px}
 .kick i{font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--stage);display:grid;place-items:center;font-family:var(--f-mono);font-size:20px;font-weight:700}
@@ -61,7 +77,7 @@ h3{font-family:var(--f-display);font-weight:800;font-size:36px;margin:0}
 .blank .a{display:none}
 .blank.open{border-style:solid;border-color:var(--ok);background:var(--ok-soft);color:var(--ink);animation:pop .3s ease}
 .blank.open .ph{display:none}.blank.open .a{display:block}
-@keyframes pop{0%{transform:scale(.97)}60%{transform:scale(1.02)}100%{transform:none}}
+@keyframes pop{0%{transform:scale(.92);opacity:.5}55%{transform:scale(1.04);opacity:1}100%{transform:none}}
 .blank.block{display:flex;width:100%}
 
 /* soru kartı */
@@ -169,7 +185,7 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
 .notes{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(900px,calc(100% - 32px));background:var(--amber-soft);color:var(--amber);border:1.5px solid var(--amber);border-radius:16px;padding:14px 20px;font-size:16px;line-height:1.5;z-index:5;box-shadow:0 12px 40px -16px rgba(0,0,0,.4)}
 .notes b{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
 .hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--hero);color:var(--hero-ink);padding:10px 18px;border-radius:12px;font-size:14px;z-index:6;max-width:calc(100% - 32px);text-align:center}
-@media (prefers-reduced-motion:reduce){.slide.on,.blank.open{animation:none}.caret{animation:none}.prog i{transition:none}}
+@media (prefers-reduced-motion:reduce){.slide.on,.slide.on *,.blank.open{animation:none!important}.caret{animation:none}.prog i{transition:none}}
 </style>
 
 <div class="deck">
@@ -210,14 +226,15 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
 </section>
 
 <!-- 5 FARK -->
-<section class="slide" data-sec="a" data-notes="Benzetme: tarayıcı araba, arama motoru harita. İkisini birlikte kullanırız.">
+<section class="slide" data-sec="a" data-notes="Akılda kalacak cümle: Tarayıcı açar, arama motoru bulur. Benzetme kütüphane: tarayıcı kütüphanenin binası (içine girer, okursun), arama motoru kütüphaneci (iste, bulup getirsin). Önce 'İkisi kütüphanede kim olurdu?' diye sor, sonra kutuları aç.">
   <div class="kick">Farkı ne?</div>
-  <h2>Tarayıcı ve arama motoru</h2>
+  <h2>Biri <span class="hl">açar</span>, diğeri <span class="hl">bulur</span></h2>
   <div class="diff fill">
-    <div><span class="t">Web tarayıcısı</span><p>İnternet sayfalarını açıp ekranda gösteren <b>program</b>.</p><span class="ex">Chrome · Firefox · Edge · Safari</span><span class="ex">Bizi gideceğimiz yere götüren <b>araba</b> gibi.</span></div>
+    <div><div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg></div><span class="t">Web tarayıcısı</span><span class="verb">AÇAR ve GÖSTERİR</span><span class="ex">Sayfaları ekranda gösteren <b>program</b>. Chrome · Firefox · Edge · Safari</span><button class="blank"><span class="ph">Kütüphanede kim olurdu?</span><span class="a"><b>Kütüphane binası:</b> içine girer, kitabı açıp okursun.</span></button></div>
     <div class="ne">≠</div>
-    <div><span class="t">Arama motoru</span><p>İnternetteki sayfaları, görselleri, videoları bulup liste hâlinde sunan <b>internet hizmeti</b>.</p><span class="ex">Google · Bing · Yandex · DuckDuckGo</span><span class="ex">Nereye gideceğimizi gösteren <b>harita</b> gibi.</span></div>
+    <div><div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><span class="t">Arama motoru</span><span class="verb">BULUR ve SIRALAR</span><span class="ex">Sayfa, görsel, video bulup liste yapan <b>internet hizmeti</b>. Google · Bing · Yandex</span><button class="blank"><span class="ph">Kütüphanede kim olurdu?</span><span class="a"><b>Kütüphaneci:</b> "Uzay kitabı lazım" dersin, raflardan bulup getirir.</span></button></div>
   </div>
+  <div class="hook">Akılda tut: <b>Tarayıcı açar, arama motoru bulur.</b></div>
 </section>
 
 <!-- 6 ÇİPLER -->
@@ -231,6 +248,28 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
     <div class="chip"><b>Bing</b><button class="blank"><span class="ph">Dokun</span><span class="a">Arama motoru</span></button></div>
     <div class="chip"><b>Edge</b><button class="blank"><span class="ph">Dokun</span><span class="a">Tarayıcı</span></button></div>
     <div class="chip"><b>DuckDuckGo</b><button class="blank"><span class="ph">Dokun</span><span class="a">Arama motoru</span></button></div>
+  </div>
+</section>
+
+<!-- 6b KİM YAPTI -->
+<section class="slide" data-sec="a" data-notes="Oyun gibi oynat: her durumu oku, sınıf 'tarayıcı' ya da 'arama motoru' diye bağırsın, sonra aç. İpucu cümlesi: açıyor, gösteriyor, saklıyorsa tarayıcı; bulup sıralıyorsa arama motoru.">
+  <div class="kick">Oyun · Kim yaptı?</div>
+  <h2>Bu işi tarayıcı mı yaptı, arama motoru mu?</h2>
+  <div class="rows fill" style="gap:14px">
+    <div class="row"><span class="s">YouTube sayfasını ekranda gösterdi</span><button class="blank"><span class="ph">Kim yaptı?</span><span class="a">Tarayıcı <span class="muted">(açtı, gösterdi)</span></span></button></div>
+    <div class="row"><span class="s">"en hızlı hayvan" yazınca çitayı buldu</span><button class="blank"><span class="ph">Kim yaptı?</span><span class="a">Arama motoru <span class="muted">(buldu)</span></span></button></div>
+    <div class="row"><span class="s">Yeni bir sekme açtı</span><button class="blank"><span class="ph">Kim yaptı?</span><span class="a">Tarayıcı</span></button></div>
+    <div class="row"><span class="s">Sonuçları en uygundan başlayarak sıraladı</span><button class="blank"><span class="ph">Kim yaptı?</span><span class="a">Arama motoru <span class="muted">(sıraladı)</span></span></button></div>
+    <div class="row"><span class="s">Sevdiğin oyun sitesini yer imlerine kaydetti</span><button class="blank"><span class="ph">Kim yaptı?</span><span class="a">Tarayıcı <span class="muted">(sakladı)</span></span></button></div>
+  </div>
+</section>
+
+<!-- 6c DENEY -->
+<section class="slide qslide" data-sec="a" data-notes="Mümkünse tahtada canlı göster: Chrome'u aç, adres çubuğuna eba.gov.tr yaz, Google'a uğramadan EBA açılır. Mesaj: arama motoru adresi bilmediğimizde işe yarar.">
+  <div class="ask">
+    <div class="lbl">BİR DENEYELİM</div>
+    <div class="qq">Google'a hiç uğramadan EBA'ya girebilir miyiz?</div>
+    <button class="blank block"><span class="ph">Cevap için dokun</span><span class="a"><b>Evet!</b> Tarayıcının adres çubuğuna <span class="mono">eba.gov.tr</span> yazarız, sayfa açılır. Adresi biliyorsak arama motoruna gerek yok. Arama motoru, adresi <b>bilmediğimizde</b> işe yarar.</span></button>
   </div>
 </section>
 
@@ -251,10 +290,10 @@ td .blank{min-height:58px;padding:8px 20px;font-size:26px}
   <div class="kick">Amacına göre seç</div>
   <h2>Her iş için bir arama aracı</h2>
   <div class="rows fill">
-    <div class="row"><span class="s"><b>Google · Bing · Yandex</b></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Günlük bilgi, haber, harita, görsel</span></button></div>
-    <div class="row"><span class="s"><b>Google Akademik</b></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Bilim insanlarının yazdığı araştırmalar</span></button></div>
-    <div class="row"><span class="s"><b>DuckDuckGo</b></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Arama geçmişimin takip edilmesini istemiyorsam</span></button></div>
-    <div class="row"><span class="s"><b>Sitenin kendi arama kutusu</b></span><button class="blank"><span class="ph">Ne için?</span><span class="a">O sitenin içinde aramak için (video, ansiklopedi)</span></button></div>
+    <div class="row"><span class="s"><b>Google · Bing · Yandex</b><span class="tip">Genel motorlar. Aynı kelimeyi ikisinde ara: sıralama farklı çıkar.</span></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Günlük bilgi, haber, harita, görsel</span></button></div>
+    <div class="row"><span class="s"><b>Google Akademik</b><span class="tip">Bilim insanlarının kütüphanesi</span></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Bilim insanlarının yazdığı araştırmalar</span></button></div>
+    <div class="row"><span class="s"><b>DuckDuckGo</b><span class="tip">Adındaki ördek gibi sessiz: seni takip etmez</span></span><button class="blank"><span class="ph">Ne için?</span><span class="a">Arama geçmişimin takip edilmesini istemiyorsam</span></button></div>
+    <div class="row"><span class="s"><b>Sitenin kendi arama kutusu</b><span class="tip">Sadece o evin içini arar</span></span><button class="blank"><span class="ph">Ne için?</span><span class="a">O sitenin içinde aramak için (video, ansiklopedi)</span></button></div>
   </div>
 </section>
 
@@ -615,7 +654,14 @@ function fit(){const v=$("#view");const s=Math.min(v.clientWidth/1600,v.clientHe
 addEventListener("resize",fit);fit();
 
 /* geçiş */
-function go(i){i=Math.max(0,Math.min(N-1,i));slides[cur].classList.remove("on");cur=i;const s=slides[cur];s.classList.add("on");
+let typeTok=0;
+function typeSq(s){const sq=s.querySelector(".sq");if(!sq||reduce)return;
+  const tn=[...sq.childNodes].find(n=>n.nodeType===3&&(n.textContent.trim()||sq.dataset.q!==undefined));if(!tn)return;
+  if(sq.dataset.q===undefined)sq.dataset.q=tn.textContent;const full=sq.dataset.q;
+  if(!sq.querySelector(".caret")){const c=document.createElement("span");c.className="caret";c.style.height="1em";sq.appendChild(c)}
+  const my=++typeTok;let j=0;tn.textContent="";
+  (function t(){if(my!==typeTok){tn.textContent=full;return}j++;tn.textContent=full.slice(0,j);if(j<full.length)setTimeout(t,32)})();}
+function go(i){i=Math.max(0,Math.min(N-1,i));const back=i<cur;slides[cur].classList.remove("on");cur=i;const s=slides[cur];s.classList.toggle("back",back);s.classList.add("on");typeSq(s);
   $("#cnt").textContent=`${cur+1} / ${N}`;$("#progBar").style.width=((cur+1)/N*100)+"%";
   $$("#secs button").forEach(b=>b.classList.toggle("cur",b.dataset.go===s.dataset.sec));
   $("#notesTxt").textContent=s.dataset.notes||"Bu slayt için not yok.";
